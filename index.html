@@ -141,7 +141,7 @@
   <section class="reveal">
     <div class="kicker">desde que a gente se viu</div>
     <h2>O tempo mais bonito</h2>
-    <p class="sub">Cada segundo desde 25 de maio de 2026 conta. E continua contando.</p>
+    <p class="sub">Cada segundo desde 25 de julho de 2026 conta. E continua contando.</p>
     <div class="timer">
       <div class="tbox"><b id="d">0</b><span>dias</span></div>
       <div class="tbox"><b id="h">0</b><span>horas</span></div>
@@ -209,7 +209,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* ---------- CONTADOR ---------- */
-const start = new Date("2026-05-25T00:00:00-03:00");
+const start = new Date("2026-07-25T00:00:00-03:00");
 const $ = id => document.getElementById(id);
 function tick(){
   let diff = Math.max(0, Date.now() - start.getTime());
@@ -222,11 +222,11 @@ function tick(){
   $("m").textContent = String(m).padStart(2,"0");
   $("s").textContent = String(s).padStart(2,"0");
   const now = new Date();
-  let months = (now.getFullYear()-2026)*12 + (now.getMonth()-4);
+  let months = (now.getFullYear()-2026)*12 + (now.getMonth()-6);
   if (now.getDate() < 25) months--;
   $("since").innerHTML = months > 0
-    ? `Já são <strong>${months} ${months===1?"mês":"meses"}</strong> desde 25/05/2026 💛`
-    : `Desde <strong>25/05/2026</strong> 💛`;
+    ? `Já são <strong>${months} ${months===1?"mês":"meses"}</strong> desde 25/07/2026 💛`
+    : `Desde <strong>25/07/2026</strong> 💛`;
 }
 tick(); setInterval(tick, 1000);
 
@@ -304,7 +304,7 @@ const reasons = [
   "Porque você me faz querer ser alguém melhor",
   "Porque você é girassol: vira tudo pra luz",
   "Porque 260 km parecem nada quando é por você",
-  "Porque desde 25/05 meu mundo ficou mais amarelo 🌻"
+  "Porque desde 25/07 meu mundo ficou mais amarelo 🌻"
 ];
 let ri = -1;
 $("flower").onclick = () => {

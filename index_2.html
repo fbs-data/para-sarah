@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Para a Sarah 🌻</title>
+<meta name="description" content="Um cantinho feito pelo Felipe, só pra você.">
+<meta property="og:title" content="Para a Sarah 🌻">
+<meta property="og:description" content="Um cantinho feito pelo Felipe, só pra você.">
+<meta property="og:image" content="foto.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root{
+    --night:#140f1f; --night2:#1e1630; --ink:#fff7e8; --muted:#d9c9b0;
+    --sun:#ffc52e; --sun2:#ff9f1c; --rose:#ff6f91; --leaf:#7fb069;
+    --card:rgba(255,247,232,.06); --line:rgba(255,197,46,.25);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Nunito",system-ui,sans-serif;color:var(--ink);
+    background:radial-gradient(1200px 800px at 50% -10%,#3a2347 0%,var(--night2) 40%,var(--night) 100%) fixed;
+    background-color:var(--night);
+    min-height:100vh;overflow-x:hidden;line-height:1.6;
+  }
+  /* estrelas */
+  #stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+  #petals{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+  .petal{position:absolute;top:-40px;font-size:20px;animation:fall linear forwards;opacity:.9}
+  @keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--rot));opacity:.2}}
+
+  main{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:0 16px}
+  section{padding:72px 0}
+  .reveal{opacity:0;transform:translateY(30px);transition:all 1s ease}
+  .reveal.on{opacity:1;transform:none}
+
+  h1,h2{font-family:"Fraunces",serif;font-weight:600;letter-spacing:-.01em}
+  .hand{font-family:"Caveat",cursive}
+  .kicker{font-family:"Caveat",cursive;color:var(--sun);font-size:1.6rem;text-align:center}
+  h2{font-size:clamp(1.8rem,5vw,2.6rem);text-align:center;margin-bottom:10px}
+  .sub{color:var(--muted);text-align:center;max-width:560px;margin:0 auto 32px}
+
+  /* HERO */
+  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-top:40px}
+  .hero h1{font-size:clamp(2.6rem,10vw,5.2rem);line-height:1.05;margin:8px 0 18px}
+  .hero h1 em{color:var(--sun);font-style:italic}
+  .polaroid{background:#fffaf0;padding:12px 12px 78px;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,.55);
+    transform:rotate(-3deg);max-width:300px;width:78vw;position:relative;transition:transform .5s}
+  .polaroid:hover{transform:rotate(0) scale(1.03)}
+  .polaroid img{width:100%;display:block;aspect-ratio:3/4;object-fit:cover;object-position:50% 30%}
+  .polaroid .cap{position:absolute;bottom:8px;left:10px;right:10px;color:#4a3a2a;font-family:"Caveat",cursive;font-size:1.45rem;line-height:1.15}
+  .tape{position:absolute;top:-14px;left:50%;width:110px;height:30px;margin-left:-55px;background:rgba(255,197,46,.55);transform:rotate(4deg)}
+  .scroll{margin-top:36px;color:var(--muted);font-size:.9rem;animation:bob 2s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(8px)}}
+
+  /* CONTADOR */
+  .timer{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:640px;margin:0 auto}
+  .tbox{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 6px;text-align:center;backdrop-filter:blur(6px)}
+  .tbox b{display:block;font-family:"Fraunces",serif;font-size:clamp(1.8rem,7vw,3rem);color:var(--sun);font-variant-numeric:tabular-nums;line-height:1.1}
+  .tbox span{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .since{text-align:center;margin-top:18px;color:var(--muted)}
+  .since strong{color:var(--ink)}
+
+  /* MAPA */
+  .mapwrap{position:relative;border-radius:22px;overflow:hidden;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  #map{height:440px;width:100%;background:#2a2238}
+  .distcard{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:20px}
+  .pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:10px 18px;font-size:.95rem}
+  .pill b{color:var(--sun)}
+  .heart-icon{font-size:30px;line-height:1;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5));animation:beat 1.4s ease-in-out infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.15)}}
+  .leaflet-popup-content-wrapper{border-radius:14px;font-family:"Nunito",sans-serif}
+  .leaflet-popup-content{font-size:14px;text-align:center}
+  .route-line{stroke-dasharray:8 10;animation:dash 1.2s linear infinite}
+  @keyframes dash{to{stroke-dashoffset:-36}}
+  .mapnote{text-align:center;font-family:"Caveat",cursive;font-size:1.5rem;color:var(--sun);margin-top:18px}
+
+  /* FRASES */
+  .quote-stage{position:relative;max-width:720px;margin:0 auto;min-height:260px;display:flex;align-items:center;justify-content:center}
+  .quote{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0;transition:opacity .9s ease;padding:0 8px}
+  .quote.on{opacity:1}
+  .quote p{font-family:"Fraunces",serif;font-style:italic;font-size:clamp(1.25rem,4vw,1.8rem);line-height:1.45}
+  .quote small{display:block;margin-top:14px;color:var(--sun);font-family:"Caveat",cursive;font-size:1.4rem}
+  .dots{display:flex;gap:8px;justify-content:center;margin-top:18px}
+  .dots button{width:9px;height:9px;border-radius:50%;border:0;background:rgba(255,247,232,.25);cursor:pointer}
+  .dots button.on{background:var(--sun);width:24px;border-radius:9px;transition:width .3s}
+
+  /* GIRASSOL / RAZÕES */
+  .flower-btn{display:block;margin:0 auto;background:none;border:0;cursor:pointer;font-size:88px;transition:transform .4s;filter:drop-shadow(0 10px 20px rgba(255,197,46,.35))}
+  .flower-btn:active{transform:rotate(30deg) scale(.95)}
+  .reason{min-height:84px;text-align:center;font-family:"Caveat",cursive;font-size:clamp(1.6rem,5vw,2.1rem);color:var(--ink);margin-top:12px;transition:opacity .4s}
+  .count{text-align:center;color:var(--muted);font-size:.85rem}
+
+  /* CARTA */
+  .envelope{max-width:520px;margin:0 auto;cursor:pointer;position:relative}
+  .env-closed{background:linear-gradient(160deg,#ffe6a8,#ffc52e);color:#5a3b10;border-radius:16px;padding:46px 20px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.45);position:relative;overflow:hidden}
+  .env-closed:before{content:"";position:absolute;left:0;right:0;top:0;height:50%;background:linear-gradient(135deg,transparent 49.5%,rgba(0,0,0,.08) 50%),linear-gradient(225deg,transparent 49.5%,rgba(0,0,0,.08) 50%);}
+  .seal{font-size:46px;position:relative}
+  .env-closed p{font-family:"Caveat",cursive;font-size:1.7rem;position:relative}
+  .letter{display:none;background:#fffaf0;color:#3d2c1e;border-radius:12px;padding:32px 26px;box-shadow:0 20px 50px rgba(0,0,0,.45);font-family:"Caveat",cursive;font-size:1.55rem;line-height:1.45;
+    background-image:repeating-linear-gradient(transparent 0 36px,rgba(120,90,60,.12) 36px 37px)}
+  .envelope.open .env-closed{display:none}
+  .envelope.open .letter{display:block;animation:pop .7s ease}
+  @keyframes pop{from{transform:translateY(20px) scale(.96);opacity:0}}
+  .letter .sign{text-align:right;margin-top:16px}
+
+  footer{text-align:center;padding:40px 16px 60px;color:var(--muted);position:relative;z-index:1}
+  footer .hand{font-size:1.6rem;color:var(--sun)}
+
+  @media (max-width:560px){
+    section{padding:56px 0}
+    .timer{gap:8px}
+    .tbox{padding:14px 2px;border-radius:14px}
+    .tbox span{font-size:.65rem}
+    #map{height:360px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div id="petals"></div>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="kicker">um cantinho só seu</div>
+    <h1>Para a <em>Sarah</em> 🌻</h1>
+    <div class="polaroid">
+      <div class="tape"></div>
+      <img src="foto.jpg" alt="Sarah sorrindo com um buquê de girassóis">
+      <div class="cap">o girassol mais lindo e belo que já vi</div>
+    </div>
+    <div class="scroll">role pra baixo ↓</div>
+  </section>
+
+  <!-- CONTADOR -->
+  <section class="reveal">
+    <div class="kicker">desde que a gente se viu</div>
+    <h2>O tempo mais bonito</h2>
+    <p class="sub">Cada segundo desde 25 de maio de 2026 conta. E continua contando.</p>
+    <div class="timer">
+      <div class="tbox"><b id="d">0</b><span>dias</span></div>
+      <div class="tbox"><b id="h">0</b><span>horas</span></div>
+      <div class="tbox"><b id="m">0</b><span>minutos</span></div>
+      <div class="tbox"><b id="s">0</b><span>segundos</span></div>
+    </div>
+    <p class="since" id="since"></p>
+  </section>
+
+  <!-- MAPA -->
+  <section class="reveal">
+    <div class="kicker">entre Ribeirão Preto e Francisco Morato</div>
+    <h2>A distância entre nós</h2>
+    <p class="sub">No mapa parece longe. No coração, é do lado.</p>
+    <div class="mapwrap"><div id="map"></div></div>
+    <div class="distcard">
+      <div class="pill">📍 <b id="km">—</b> em linha reta</div>
+      <div class="pill">👣 cerca de <b id="steps">—</b> passos</div>
+      <div class="pill">💛 distância no coração: <b>0 km</b></div>
+    </div>
+    <p class="mapnote">…e mesmo assim, olhamos pro mesmo céu ✨</p>
+  </section>
+
+  <!-- FRASES -->
+  <section class="reveal">
+    <div class="kicker">sobre a distância</div>
+    <h2>Frases que lembram você</h2>
+    <div class="quote-stage" id="quotes"></div>
+    <div class="dots" id="dots"></div>
+  </section>
+
+  <!-- GIRASSOL -->
+  <section class="reveal">
+    <div class="kicker">toque no girassol</div>
+    <h2>Por que eu gosto de você</h2>
+    <button class="flower-btn" id="flower" aria-label="Mostrar um motivo">🌻</button>
+    <p class="reason" id="reason">clica aí 👆</p>
+    <p class="count" id="rcount"></p>
+  </section>
+
+  <!-- CARTA -->
+  <section class="reveal">
+    <div class="kicker">uma cartinha</div>
+    <h2>Abra quando sentir saudade</h2>
+    <div class="envelope" id="env">
+      <div class="env-closed">
+        <div class="seal">💌</div>
+        <p>toque para abrir</p>
+      </div>
+      <div class="letter">
+        <p>Sarah,</p>
+        <p>Se tu me cativas, nós teremos necessidade um do outro. Serás para mim única no mundo. E eu serei para ti único no mundo. Só se vê bem com o coração, o essencial é invisível aos olhos.</p>
+        <p>Meu girassol não é como os outros, pois é o tempo que eu dediquei para ele que o tornou especial.</p>
+        <p class="sign">lov u 💛<br>Felipe</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p class="hand">feito com carinho pelo Felipe, para a Sarah · lov u 💛</p>
+  <p>Ribeirão Preto 💛 Francisco Morato</p>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ---------- CONTADOR ---------- */
+const start = new Date("2026-05-25T00:00:00-03:00");
+const $ = id => document.getElementById(id);
+function tick(){
+  let diff = Math.max(0, Date.now() - start.getTime());
+  const d = Math.floor(diff/864e5); diff -= d*864e5;
+  const h = Math.floor(diff/36e5);  diff -= h*36e5;
+  const m = Math.floor(diff/6e4);   diff -= m*6e4;
+  const s = Math.floor(diff/1e3);
+  $("d").textContent = d.toLocaleString("pt-BR");
+  $("h").textContent = String(h).padStart(2,"0");
+  $("m").textContent = String(m).padStart(2,"0");
+  $("s").textContent = String(s).padStart(2,"0");
+  const now = new Date();
+  let months = (now.getFullYear()-2026)*12 + (now.getMonth()-4);
+  if (now.getDate() < 25) months--;
+  $("since").innerHTML = months > 0
+    ? `Já são <strong>${months} ${months===1?"mês":"meses"}</strong> desde 25/05/2026 💛`
+    : `Desde <strong>25/05/2026</strong> 💛`;
+}
+tick(); setInterval(tick, 1000);
+
+/* ---------- MAPA ---------- */
+// pontos aproximados (bairro), sem endereço exato
+const eu   = [-21.164, -47.840];  // Felipe — Ribeirão Preto
+const ela  = [-23.278, -46.730];  // Sarah — Francisco Morato
+function haversine(a,b){
+  const R=6371, r=x=>x*Math.PI/180;
+  const dLat=r(b[0]-a[0]), dLon=r(b[1]-a[1]);
+  const h=Math.sin(dLat/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+const km = haversine(eu, ela);
+$("km").textContent = Math.round(km) + " km";
+$("steps").textContent = Math.round(km*1000/0.75).toLocaleString("pt-BR");
+
+let map = null;
+if (window.L) {
+map = L.map("map", {scrollWheelZoom:false, zoomControl:true});
+L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+  maxZoom: 18
+}).addTo(map);
+const icon = e => L.divIcon({className:"", html:`<div class="heart-icon">${e}</div>`, iconSize:[30,30], iconAnchor:[15,15]});
+L.marker(eu,{icon:icon("💛")}).addTo(map).bindPopup("<b>Felipe</b><br>Ribeirão Preto");
+L.marker(ela,{icon:icon("🌻")}).addTo(map).bindPopup("<b>Sarah</b><br>Francisco Morato").openPopup();
+// arco curvinho entre os dois
+const arc = [];
+const mid = [(eu[0]+ela[0])/2 + 0.25, (eu[1]+ela[1])/2 - 0.45];
+for (let t=0;t<=1;t+=0.02){
+  arc.push([(1-t)**2*eu[0]+2*(1-t)*t*mid[0]+t*t*ela[0], (1-t)**2*eu[1]+2*(1-t)*t*mid[1]+t*t*ela[1]]);
+}
+L.polyline(arc,{color:"#ff6f91",weight:4,opacity:.9,className:"route-line"}).addTo(map);
+map.fitBounds(L.latLngBounds([eu,ela]).pad(0.35));
+}
+
+/* ---------- FRASES ---------- */
+const quotes = [
+  ["Se alguém ama uma flor da qual só existe um exemplar em milhões e milhões de estrelas, isso basta para fazê-lo feliz quando as contempla.","O Pequeno Príncipe"],
+  ["O essencial é invisível aos olhos.","O Pequeno Príncipe"],
+  ["Foi o tempo que dedicaste à tua rosa que fez tua rosa tão importante.","O Pequeno Príncipe"],
+  ["Se tu vens, por exemplo, às quatro da tarde, desde as três eu começarei a ser feliz.","O Pequeno Príncipe"],
+  ["Tu te tornas eternamente responsável por aquilo que cativas.","O Pequeno Príncipe"],
+  ["A distância só ensina o tamanho do que a gente sente.","Felipe"],
+  ["São mais de 260 km entre nós, e nenhum centímetro de dúvida.","Felipe"],
+  ["Quem sente saudade é porque tem alguém especial.","dito popular"],
+  ["Longe dos olhos, perto do coração.","dito popular"],
+  ["Nem toda distância é ausência, nem todo silêncio é esquecimento.","dito popular"],
+  ["Você é o meu girassol: mesmo de longe, é pra você que eu me viro.","Felipe"]
+];
+const stage = $("quotes"), dots = $("dots");
+quotes.forEach(([t,a],i)=>{
+  const q=document.createElement("div"); q.className="quote"+(i===0?" on":"");
+  q.innerHTML=`<p>“${t}”</p><small>— ${a}</small>`; stage.appendChild(q);
+  const b=document.createElement("button"); b.setAttribute("aria-label","Frase "+(i+1));
+  if(i===0) b.className="on"; b.onclick=()=>show(i,true); dots.appendChild(b);
+});
+let qi=0, qtimer;
+function show(i,user){
+  stage.children[qi].classList.remove("on"); dots.children[qi].classList.remove("on");
+  qi=i; stage.children[qi].classList.add("on"); dots.children[qi].classList.add("on");
+  if(user){clearInterval(qtimer); qtimer=setInterval(()=>show((qi+1)%quotes.length),7000);}
+}
+qtimer=setInterval(()=>show((qi+1)%quotes.length),7000);
+
+/* ---------- MOTIVOS ---------- */
+const reasons = [
+  "Pelo seu sorriso, que ilumina mais que poste de rua à noite 😄",
+  "Pelo jeito que seus cachos têm vida própria",
+  "Porque você fica linda até de óculos tortos",
+  "Porque conversar com você é a melhor parte do meu dia",
+  "Porque com você até a saudade é bonita",
+  "Pela sua risada, que é o som mais gostoso de ouvir",
+  "Porque você me faz querer ser alguém melhor",
+  "Porque você é girassol: vira tudo pra luz",
+  "Porque 260 km parecem nada quando é por você",
+  "Porque desde 25/05 meu mundo ficou mais amarelo 🌻"
+];
+let ri = -1;
+$("flower").onclick = () => {
+  ri = (ri+1) % reasons.length;
+  const r = $("reason"); r.style.opacity = 0;
+  setTimeout(()=>{ r.textContent = reasons[ri]; r.style.opacity = 1; }, 250);
+  $("rcount").textContent = `motivo ${ri+1} de muitos`;
+  burst(8);
+};
+
+/* ---------- CARTA ---------- */
+$("env").onclick = () => { $("env").classList.add("open"); burst(20); };
+
+/* ---------- PÉTALAS ---------- */
+const petalBox = $("petals");
+function petal(){
+  const p=document.createElement("div"); p.className="petal";
+  p.textContent = Math.random()<.7 ? "🌻" : "💛";
+  p.style.left = Math.random()*100+"vw";
+  p.style.fontSize = (14+Math.random()*16)+"px";
+  p.style.setProperty("--dx",(Math.random()*160-80)+"px");
+  p.style.setProperty("--rot",(Math.random()*720-360)+"deg");
+  p.style.animationDuration = (6+Math.random()*6)+"s";
+  petalBox.appendChild(p); setTimeout(()=>p.remove(),13000);
+}
+function burst(n){ for(let i=0;i<n;i++) setTimeout(petal, i*90); }
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches){ setInterval(petal, 1400); burst(6); }
+
+/* ---------- ESTRELAS ---------- */
+const cv=$("stars"), cx=cv.getContext("2d"); let stars=[];
+function size(){ cv.width=innerWidth*devicePixelRatio; cv.height=innerHeight*devicePixelRatio;
+  stars=Array.from({length:Math.round(innerWidth/6)},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height*.8,r:Math.random()*1.4*devicePixelRatio+.3,p:Math.random()*6.28})); }
+function draw(t){ cx.clearRect(0,0,cv.width,cv.height);
+  for(const s of stars){ cx.globalAlpha=.35+.65*Math.abs(Math.sin(t/1400+s.p)); cx.fillStyle="#fff7e8"; cx.beginPath(); cx.arc(s.x,s.y,s.r,0,6.28); cx.fill(); }
+  requestAnimationFrame(draw); }
+size(); addEventListener("resize",size); requestAnimationFrame(draw);
+
+/* ---------- REVEAL ---------- */
+const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("on"); if(e.target.querySelector("#map")) map && map.invalidateSize(); } }),{threshold:.15});
+document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

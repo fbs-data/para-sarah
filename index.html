@@ -719,11 +719,20 @@ $("steps").textContent = Math.round(km*1000/0.75).toLocaleString("pt-BR");
 let map = null;
 if (window.L) {
 map = L.map("map", {scrollWheelZoom:false, zoomControl:true});
-// mapa da CARTO (o servidor do OpenStreetMap bloqueia sites pessoais)
-L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-  subdomains: "abcd", maxZoom: 19
+// mapa da Esri (não precisa de chave); se falhar, troca pro OpenStreetMap HOT
+const esri = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+  attribution:'Tiles &copy; Esri &middot; dados &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  maxZoom: 18
 }).addTo(map);
+let tileErr = 0;
+esri.on("tileerror", () => {
+  if (++tileErr !== 3) return;
+  map.removeLayer(esri);
+  L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &middot; HOT',
+    subdomains: "abc", maxZoom: 19
+  }).addTo(map);
+});
 const icon = e => L.divIcon({className:"", html:`<div class="heart-icon">${e}</div>`, iconSize:[30,30], iconAnchor:[15,15]});
 L.marker(eu,{icon:icon("💛")}).addTo(map).bindPopup("<b>Felipe</b><br>Ribeirão Preto");
 L.marker(ela,{icon:icon("🌻")}).addTo(map).bindPopup("<b>Sarah</b><br>Francisco Morato").openPopup();

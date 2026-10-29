@@ -1,0 +1,1082 @@
+<!doctype html>
+<html lang="pt-BR" translate="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google" content="notranslate">
+<title>Para a Sarah 🌻</title>
+<meta name="description" content="Um cantinho feito pelo Felipe, só pra você.">
+<meta property="og:title" content="Para a Sarah 🌻">
+<meta property="og:description" content="Um cantinho feito pelo Felipe, só pra você.">
+<meta property="og:image" content="39c34314-677b-4dd1-90b6-3b194a57fb7d.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root{
+    --night:#140f1f; --night2:#1e1630; --ink:#fff7e8; --muted:#d9c9b0;
+    --sun:#ffc52e; --sun2:#ff9f1c; --rose:#ff6f91; --leaf:#7fb069;
+    --card:rgba(255,247,232,.06); --line:rgba(255,197,46,.25);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Nunito",system-ui,sans-serif;color:var(--ink);
+    background:radial-gradient(1200px 800px at 50% -10%,#3a2347 0%,var(--night2) 40%,var(--night) 100%) fixed;
+    background-color:var(--night);
+    min-height:100vh;overflow-x:hidden;line-height:1.6;
+  }
+  /* estrelas */
+  #stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+  #petals{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
+  .petal{position:absolute;top:-40px;font-size:20px;animation:fall linear forwards;opacity:.9}
+  @keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--rot));opacity:.2}}
+
+  main{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:0 16px}
+  section{padding:72px 0}
+  .reveal{opacity:0;transform:translateY(30px);transition:all 1s ease}
+  .reveal.on{opacity:1;transform:none}
+
+  h1,h2{font-family:"Fraunces",serif;font-weight:600;letter-spacing:-.01em}
+  .hand{font-family:"Caveat",cursive}
+  .kicker{font-family:"Caveat",cursive;color:var(--sun);font-size:1.6rem;text-align:center}
+  h2{font-size:clamp(1.8rem,5vw,2.6rem);text-align:center;margin-bottom:10px}
+  .sub{color:var(--muted);text-align:center;max-width:560px;margin:0 auto 32px}
+
+  /* HERO */
+  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-top:40px}
+  .hero h1{font-size:clamp(2.6rem,10vw,5.2rem);line-height:1.05;margin:8px 0 18px}
+  .hero h1 em{color:var(--sun);font-style:italic}
+  .polaroid{background:#fffaf0;padding:12px 12px 78px;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,.55);
+    transform:rotate(-3deg);max-width:300px;width:78vw;position:relative;transition:transform .5s}
+  .polaroid:hover{transform:rotate(0) scale(1.03)}
+  .polaroid img{width:100%;display:block;aspect-ratio:3/4;object-fit:cover;object-position:50% 30%}
+  .polaroid .cap{position:absolute;bottom:8px;left:10px;right:10px;color:#4a3a2a;font-family:"Caveat",cursive;font-size:1.45rem;line-height:1.15}
+  .tape{position:absolute;top:-14px;left:50%;width:110px;height:30px;margin-left:-55px;background:rgba(255,197,46,.55);transform:rotate(4deg)}
+  .scroll{margin-top:36px;color:var(--muted);font-size:.9rem;animation:bob 2s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(8px)}}
+  .hero-badge{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 18px;font-size:.95rem}
+  .hero-badge b{color:var(--sun)}
+  .hero-badge:empty{display:none}
+
+  /* FRASE DO DIA */
+  .daily{max-width:620px;margin:30px auto 0;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:34px 24px 26px;position:relative}
+  .daily:before{content:"🌻";position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:38px}
+  .daily p{font-family:"Fraunces",serif;font-style:italic;font-size:clamp(1.25rem,4vw,1.7rem);line-height:1.45}
+  .daily small{display:block;margin-top:14px;color:var(--muted);font-size:.85rem}
+
+  /* CONTADOR */
+  .timer{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:640px;margin:0 auto}
+  .tbox{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 6px;text-align:center;backdrop-filter:blur(6px)}
+  .tbox b{display:block;font-family:"Fraunces",serif;font-size:clamp(1.8rem,7vw,3rem);color:var(--sun);font-variant-numeric:tabular-nums;line-height:1.1}
+  .tbox span{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .since{text-align:center;margin-top:18px;color:var(--muted)}
+  .since strong{color:var(--ink)}
+
+  /* PRÓXIMO ENCONTRO */
+  .meet .tbox{border-color:rgba(255,111,145,.4);background:rgba(255,111,145,.07)}
+  .meet .tbox b{color:var(--rose)}
+  .meet-big{font-family:"Caveat",cursive;font-size:clamp(2.6rem,10vw,4.4rem);color:var(--sun);text-align:center;line-height:1.1;animation:beat 2.4s ease-in-out infinite}
+  .bar{max-width:640px;margin:22px auto 0;height:10px;border-radius:99px;background:rgba(255,247,232,.08);overflow:hidden;border:1px solid var(--line)}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--rose),var(--sun));border-radius:99px;transition:width 1s}
+  .bar-legend{display:flex;justify-content:space-between;max-width:640px;margin:6px auto 0;font-size:.8rem;color:var(--muted)}
+
+  /* MAPA */
+  .mapwrap{position:relative;border-radius:22px;overflow:hidden;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  #map{height:440px;width:100%;background:#2a2238}
+  .distcard{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:20px}
+  .pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:10px 18px;font-size:.95rem}
+  .pill b{color:var(--sun)}
+  .heart-icon{font-size:30px;line-height:1;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5));animation:beat 1.4s ease-in-out infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.15)}}
+  .leaflet-popup-content-wrapper{border-radius:14px;font-family:"Nunito",sans-serif}
+  .leaflet-popup-content{font-size:14px;text-align:center}
+  .route-line{stroke-dasharray:8 10;animation:dash 1.2s linear infinite}
+  @keyframes dash{to{stroke-dashoffset:-36}}
+  .mapnote{text-align:center;font-family:"Caveat",cursive;font-size:1.5rem;color:var(--sun);margin-top:18px}
+
+  /* MESMO CÉU */
+  .sky{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:16px;align-items:stretch}
+  .skycard{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .skycard .who{font-family:"Caveat",cursive;color:var(--sun);font-size:1.45rem;line-height:1.1}
+  .skycard .city{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .skycard .wx{font-size:46px;line-height:1.2;margin-top:6px}
+  .skycard .temp{font-family:"Fraunces",serif;font-size:2.4rem;color:var(--ink);line-height:1}
+  .skycard .desc{color:var(--muted);font-size:.95rem}
+  .skycard .sunset{margin-top:10px;font-size:.9rem;background:rgba(255,159,28,.1);border:1px solid rgba(255,159,28,.3);border-radius:99px;padding:4px 12px;white-space:nowrap}
+  .skycard .sunset b{color:var(--sun2)}
+  .moon-card{justify-content:center}
+  .moon-card svg{width:120px;height:120px;filter:drop-shadow(0 0 24px rgba(255,247,232,.35))}
+  .moon-card .mname{font-family:"Fraunces",serif;font-size:1.3rem;margin-top:8px}
+  .moon-card .mpct{color:var(--muted);font-size:.9rem}
+  .skyline{max-width:640px;margin:22px auto 0;text-align:center;font-family:"Caveat",cursive;font-size:1.6rem;color:var(--ink);line-height:1.3}
+  .skyline.small{font-family:"Nunito",sans-serif;font-size:.95rem;color:var(--muted);margin-top:8px}
+
+  /* FRASES */
+  .quote-stage{position:relative;max-width:720px;margin:0 auto;min-height:260px;display:flex;align-items:center;justify-content:center}
+  .quote{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0;transition:opacity .9s ease;padding:0 8px}
+  .quote.on{opacity:1}
+  .quote p{font-family:"Fraunces",serif;font-style:italic;font-size:clamp(1.25rem,4vw,1.8rem);line-height:1.45}
+  .quote small{display:block;margin-top:14px;color:var(--sun);font-family:"Caveat",cursive;font-size:1.4rem}
+  .dots{display:flex;gap:8px;justify-content:center;margin-top:18px}
+  .dots button{width:9px;height:9px;border-radius:50%;border:0;background:rgba(255,247,232,.25);cursor:pointer}
+  .dots button.on{background:var(--sun);width:24px;border-radius:9px;transition:width .3s}
+
+  /* LINHA DO TEMPO */
+  .timeline{max-width:620px;margin:0 auto;position:relative;padding-left:34px}
+  .timeline:before{content:"";position:absolute;left:11px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--sun),var(--rose))}
+  .tl{position:relative;margin-bottom:22px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
+  .tl:before{content:attr(data-ico);position:absolute;left:-36px;top:12px;width:26px;height:26px;border-radius:50%;background:var(--night2);border:2px solid var(--sun);display:flex;align-items:center;justify-content:center;font-size:13px}
+  .tl .when{font-family:"Caveat",cursive;color:var(--sun);font-size:1.35rem;line-height:1.1}
+  .tl h3{font-family:"Fraunces",serif;font-weight:600;font-size:1.15rem;margin:2px 0 4px}
+  .tl p{color:var(--muted);font-size:.95rem}
+  .tl.future{border-style:dashed;border-color:rgba(255,111,145,.6);background:rgba(255,111,145,.06)}
+  .tl.future:before{border-color:var(--rose);animation:beat 1.6s ease-in-out infinite}
+  .tl.future .when{color:var(--rose)}
+
+  /* GALERIA */
+  .gallery{display:flex;flex-wrap:wrap;justify-content:center;gap:28px 22px;padding-top:10px}
+  .gallery .polaroid{max-width:230px;width:42vw;padding:10px 10px 64px}
+  .gallery .polaroid:nth-child(3n+1){transform:rotate(-4deg)}
+  .gallery .polaroid:nth-child(3n+2){transform:rotate(3deg) translateY(14px)}
+  .gallery .polaroid:nth-child(3n){transform:rotate(-1.5deg)}
+  .gallery .polaroid:hover{transform:rotate(0) scale(1.05);z-index:2}
+  .gallery .polaroid .cap{font-size:1.25rem}
+  .ph-empty{width:100%;aspect-ratio:3/4;background:repeating-linear-gradient(45deg,#f3e7cf 0 12px,#efe0c3 12px 24px);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#8a6d47;font-family:"Caveat",cursive;font-size:1.3rem;text-align:center;padding:10px}
+  .ph-empty span{font-size:42px;line-height:1.2}
+
+  /* MÚSICA */
+  .music{max-width:560px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;text-align:center}
+  .vinyl{width:96px;height:96px;margin:0 auto 14px;border-radius:50%;background:radial-gradient(circle,var(--sun) 0 14%,#111 15% 18%,#222 19% 30%,#151515 31% 45%,#222 46% 60%,#111 61% 100%);animation:spin 4s linear infinite;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .music .song{font-family:"Fraunces",serif;font-size:1.35rem}
+  .music .artist{color:var(--muted);font-size:.95rem;margin-bottom:12px}
+  .music .why{font-family:"Caveat",cursive;font-size:1.4rem;color:var(--sun);margin-top:12px}
+  .music iframe{width:100%;border:0;border-radius:14px}
+
+  /* GIRASSOL QUE CRESCE */
+  .grow{display:flex;flex-direction:column;align-items:center}
+  .grow svg{width:min(300px,80vw);height:auto;overflow:visible}
+  .gp{transform-box:fill-box;transform-origin:50% 100%;opacity:0;transform:scale(.2)}
+  .reveal.on .gp{animation:petalIn .7s cubic-bezier(.3,1.6,.5,1) forwards;animation-delay:var(--dl)}
+  @keyframes petalIn{to{opacity:1;transform:scale(1)}}
+  .grow-sway{transform-origin:150px 380px;animation:sway 6s ease-in-out infinite}
+  @keyframes sway{50%{transform:rotate(2.5deg)}}
+  .growtxt{text-align:center;margin-top:8px}
+  .growtxt b{color:var(--sun);font-family:"Fraunces",serif;font-size:1.5rem}
+  .growtxt p{color:var(--muted);font-size:.95rem;max-width:460px;margin:4px auto 0}
+
+  /* MOTIVOS */
+  .flower-btn{display:block;margin:0 auto;background:none;border:0;cursor:pointer;font-size:88px;transition:transform .4s;filter:drop-shadow(0 10px 20px rgba(255,197,46,.35))}
+  .flower-btn:active{transform:rotate(30deg) scale(.95)}
+  .reason{min-height:84px;text-align:center;font-family:"Caveat",cursive;font-size:clamp(1.6rem,5vw,2.1rem);color:var(--ink);margin-top:12px;transition:opacity .4s}
+  .count{text-align:center;color:var(--muted);font-size:.85rem}
+
+  /* CARTA */
+  .envelope{max-width:520px;margin:0 auto;cursor:pointer;position:relative}
+  .env-closed{background:linear-gradient(160deg,#ffe6a8,#ffc52e);color:#5a3b10;border-radius:16px;padding:46px 20px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.45);position:relative;overflow:hidden}
+  .env-closed:before{content:"";position:absolute;left:0;right:0;top:0;height:50%;background:linear-gradient(135deg,transparent 49.5%,rgba(0,0,0,.08) 50%),linear-gradient(225deg,transparent 49.5%,rgba(0,0,0,.08) 50%);}
+  .seal{font-size:46px;position:relative}
+  .env-closed p{font-family:"Caveat",cursive;font-size:1.7rem;position:relative}
+  .letter{display:none;background:#fffaf0;color:#3d2c1e;border-radius:12px;padding:32px 26px;box-shadow:0 20px 50px rgba(0,0,0,.45);font-family:"Caveat",cursive;font-size:1.55rem;line-height:1.45;
+    background-image:repeating-linear-gradient(transparent 0 36px,rgba(120,90,60,.12) 36px 37px)}
+  .letter p+p{margin-top:10px}
+  .envelope.open .env-closed{display:none}
+  .envelope.open .letter{display:block;animation:pop .7s ease}
+  @keyframes pop{from{transform:translateY(20px) scale(.96);opacity:0}}
+  .letter .sign{text-align:right;margin-top:16px}
+
+  /* MAIS CARTINHAS */
+  .envgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:860px;margin:0 auto}
+  .minienv{border:0;cursor:pointer;font:inherit;background:linear-gradient(160deg,#ffe6a8,#ffc52e);color:#5a3b10;border-radius:14px;padding:26px 10px 18px;text-align:center;box-shadow:0 14px 34px rgba(0,0,0,.4);position:relative;overflow:hidden;transition:transform .3s}
+  .minienv:nth-child(2){background:linear-gradient(160deg,#ffd3de,#ff8fab)}
+  .minienv:nth-child(3){background:linear-gradient(160deg,#e3f1d6,#9fcd85)}
+  .minienv:nth-child(4){background:linear-gradient(160deg,#e6dcff,#b59cf0)}
+  .minienv:hover{transform:translateY(-4px) rotate(-1deg)}
+  .minienv:before{content:"";position:absolute;left:0;right:0;top:0;height:50%;background:linear-gradient(135deg,transparent 49.5%,rgba(0,0,0,.07) 50%),linear-gradient(225deg,transparent 49.5%,rgba(0,0,0,.07) 50%)}
+  .minienv span{display:block;font-size:34px;position:relative}
+  .minienv small{display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;opacity:.7;position:relative;margin-top:4px}
+  .minienv b{display:block;font-family:"Caveat",cursive;font-size:1.45rem;line-height:1.1;position:relative;font-weight:700}
+  .minienv.read:after{content:"lida 💛";position:absolute;top:8px;right:10px;font-size:.7rem;opacity:.7}
+
+  /* MODAL */
+  .modal{position:fixed;inset:0;z-index:150;background:rgba(10,6,18,.78);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px}
+  .modal.on{display:flex}
+  .modal-box{max-width:560px;width:100%;max-height:88vh;overflow:auto;position:relative}
+  .modal-box .letter{display:block;animation:pop .6s ease}
+  .modal-box .letter h4{font-family:"Caveat",cursive;font-size:1.3rem;color:#a0762f;font-weight:500}
+  .closebtn{display:block;margin:14px auto 0;background:var(--sun);color:#3d2c1e;border:0;border-radius:99px;padding:10px 22px;font:700 1rem "Nunito",sans-serif;cursor:pointer}
+  .mesv{background:linear-gradient(160deg,#2b1d3f,#1a1228);border:1px solid var(--line);border-radius:24px;padding:36px 24px 26px;text-align:center;animation:pop .7s ease}
+  .mesv .big{font-size:84px;line-height:1;animation:beat 1.8s ease-in-out infinite}
+  .mesv h3{font-family:"Fraunces",serif;font-size:clamp(1.9rem,7vw,2.8rem);margin:12px 0 6px}
+  .mesv h3 em{color:var(--sun)}
+  .mesv p{color:var(--muted);font-size:1.05rem;max-width:420px;margin:0 auto}
+  .mesv .hand{color:var(--sun);font-size:1.6rem;margin-top:14px}
+
+  /* VALES */
+  .vales{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;max-width:900px;margin:0 auto}
+  .vale{position:relative;border:0;font:inherit;text-align:left;cursor:pointer;color:#4a3216;background:#fff3d6;border-radius:12px;padding:16px 18px 16px 22px;box-shadow:0 12px 30px rgba(0,0,0,.35);transition:transform .25s;overflow:hidden;
+    -webkit-mask:radial-gradient(circle 10px at 0 50%,#0000 98%,#000) left/51% 100% no-repeat,radial-gradient(circle 10px at 100% 50%,#0000 98%,#000) right/51% 100% no-repeat;
+    mask:radial-gradient(circle 10px at 0 50%,#0000 98%,#000) left/51% 100% no-repeat,radial-gradient(circle 10px at 100% 50%,#0000 98%,#000) right/51% 100% no-repeat}
+  .vale:hover{transform:translateY(-3px)}
+  .vale:before{content:"";position:absolute;left:12px;top:10px;bottom:10px;border-left:2px dashed rgba(160,118,47,.35)}
+  .vale .vk{font-size:.7rem;text-transform:uppercase;letter-spacing:.16em;color:#a0762f}
+  .vale .vt{font-family:"Caveat",cursive;font-size:1.6rem;line-height:1.1;font-weight:700;margin:2px 0}
+  .vale .vh{font-size:.8rem;color:#8a6d47}
+  .vale .ve{position:absolute;right:14px;top:12px;font-size:26px}
+  .vale.armed{background:#ffe0a3;outline:3px solid var(--sun2)}
+  .vale.used{background:#e9e2d4;color:#8d8270;cursor:default;padding-bottom:40px}
+  .vale.used .ve{filter:grayscale(1);opacity:.5}
+  .stamp{position:absolute;right:10px;bottom:12px;transform:rotate(-12deg);border:3px solid #d9435f;color:#d9435f;border-radius:8px;padding:0 8px;font:800 .85rem "Nunito",sans-serif;letter-spacing:.08em;opacity:.85}
+  .vale-note{text-align:center;color:var(--muted);font-size:.85rem;margin-top:16px}
+  .vale-note a{color:var(--sun)}
+
+  /* LISTA */
+  .bucket{max-width:620px;margin:0 auto}
+  .prog{display:flex;align-items:center;gap:12px;margin-bottom:16px;color:var(--muted);font-size:.9rem}
+  .prog .bar{flex:1;margin:0}
+  .bitem{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:10px;cursor:pointer;transition:background .3s;user-select:none;position:relative}
+  .bitem input{position:absolute;opacity:0;pointer-events:none}
+  .bitem .box{flex:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--sun);display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .3s}
+  .bitem.done{background:rgba(127,176,105,.12);border-color:rgba(127,176,105,.4)}
+  .bitem.done .box{background:var(--leaf);border-color:var(--leaf)}
+  .bitem.done .btxt{text-decoration:line-through;text-decoration-color:var(--sun);color:var(--muted)}
+  .bitem:focus-within{outline:2px solid var(--sun);outline-offset:2px}
+
+  footer{text-align:center;padding:40px 16px 60px;color:var(--muted);position:relative;z-index:1}
+  footer .hand{font-size:1.6rem;color:var(--sun)}
+
+  @media (max-width:760px){
+    .sky{grid-template-columns:1fr 1fr}
+    .moon-card{grid-column:1 / -1;order:-1}
+    .envgrid{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:560px){
+    section{padding:56px 0}
+    .timer{gap:8px}
+    .tbox{padding:14px 2px;border-radius:14px}
+    .tbox span{font-size:.65rem}
+    #map{height:360px}
+    .sky{gap:10px}
+    .skycard{padding:18px 8px}
+    .skycard .temp{font-size:2rem}
+    .skycard .sunset{font-size:.78rem;padding:4px 8px}
+    .gallery{gap:22px 14px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.gp{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div id="petals"></div>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="kicker" id="heroKicker">um cantinho só seu</div>
+    <h1>Para a <em>Sarah</em> 🌻</h1>
+    <div class="polaroid">
+      <div class="tape"></div>
+      <img src="39c34314-677b-4dd1-90b6-3b194a57fb7d.jpg" alt="Sarah sorrindo com um buquê de girassóis">
+      <div class="cap">o girassol mais lindo e belo que já vi</div>
+    </div>
+    <div class="hero-badge" id="heroBadge"></div>
+    <div class="scroll">role pra baixo ↓</div>
+  </section>
+
+  <!-- FRASE DO DIA -->
+  <section class="reveal">
+    <div class="kicker" id="dailyKicker">frase de hoje</div>
+    <div class="daily">
+      <p id="dailyText"></p>
+      <small>volta amanhã que tem outra 💛</small>
+    </div>
+  </section>
+
+  <!-- CONTADOR -->
+  <section class="reveal">
+    <div class="kicker">desde que a gente se viu</div>
+    <h2>O tempo mais bonito</h2>
+    <p class="sub">Cada segundo desde 25 de julho de 2026 conta. E continua contando.</p>
+    <div class="timer">
+      <div class="tbox"><b id="d">0</b><span>dias</span></div>
+      <div class="tbox"><b id="h">0</b><span>horas</span></div>
+      <div class="tbox"><b id="m">0</b><span>minutos</span></div>
+      <div class="tbox"><b id="s">0</b><span>segundos</span></div>
+    </div>
+    <p class="since" id="since"></p>
+  </section>
+
+  <!-- PRÓXIMO ENCONTRO -->
+  <section class="reveal meet">
+    <div class="kicker" id="meetKicker">o próximo encontro</div>
+    <h2 id="meetTitle">Faltam poucos dias pra te ver</h2>
+    <p class="sub" id="meetSub"></p>
+    <div class="timer" id="meetTimer">
+      <div class="tbox"><b id="md">0</b><span>dias</span></div>
+      <div class="tbox"><b id="mh">0</b><span>horas</span></div>
+      <div class="tbox"><b id="mm">0</b><span>minutos</span></div>
+      <div class="tbox"><b id="ms">0</b><span>segundos</span></div>
+    </div>
+    <div class="meet-big" id="meetBig" hidden></div>
+    <div id="meetBarWrap">
+      <div class="bar"><i id="meetBar" style="width:0"></i></div>
+      <div class="bar-legend"><span id="meetFrom">último encontro</span><span>🌻 você</span></div>
+    </div>
+  </section>
+
+  <!-- MAPA -->
+  <section class="reveal">
+    <div class="kicker">entre Ribeirão Preto e Francisco Morato</div>
+    <h2>A distância entre nós</h2>
+    <p class="sub">No mapa parece longe. No coração, é do lado.</p>
+    <div class="mapwrap"><div id="map"></div></div>
+    <div class="distcard">
+      <div class="pill">📍 <b id="km">—</b> em linha reta</div>
+      <div class="pill">👣 cerca de <b id="steps">—</b> passos</div>
+      <div class="pill">💛 distância no coração: <b>0 km</b></div>
+    </div>
+    <p class="mapnote">…e mesmo assim, olhamos pro mesmo céu ✨</p>
+  </section>
+
+  <!-- MESMO CÉU -->
+  <section class="reveal">
+    <div class="kicker">agora mesmo</div>
+    <h2>O mesmo céu</h2>
+    <p class="sub">A mesma lua em cima de nós dois. O tempo e o pôr do sol, cada um do seu lado.</p>
+    <div class="sky">
+      <div class="skycard" id="wxEla">
+        <div class="who">aí com você 🌻</div><div class="city">Francisco Morato</div>
+        <div class="wx">⏳</div><div class="temp">--°</div><div class="desc">olhando o céu…</div>
+        <div class="sunset">🌇 pôr do sol <b>--:--</b></div>
+      </div>
+      <div class="skycard moon-card">
+        <svg viewBox="0 0 100 100" id="moonSvg" aria-hidden="true"></svg>
+        <div class="mname" id="moonName">Lua</div>
+        <div class="mpct" id="moonPct"></div>
+      </div>
+      <div class="skycard" id="wxEu">
+        <div class="who">aqui comigo 💛</div><div class="city">Ribeirão Preto</div>
+        <div class="wx">⏳</div><div class="temp">--°</div><div class="desc">olhando o céu…</div>
+        <div class="sunset">🌇 pôr do sol <b>--:--</b></div>
+      </div>
+    </div>
+    <p class="skyline" id="skyLine"></p>
+    <p class="skyline small" id="skyLine2"></p>
+  </section>
+
+  <!-- FRASES -->
+  <section class="reveal">
+    <div class="kicker">sobre a distância</div>
+    <h2>Frases que lembram você</h2>
+    <div class="quote-stage" id="quotes"></div>
+    <div class="dots" id="dots"></div>
+  </section>
+
+  <!-- LINHA DO TEMPO -->
+  <section class="reveal">
+    <div class="kicker">capítulo por capítulo</div>
+    <h2>A nossa história</h2>
+    <p class="sub">Ainda tá no comecinho. E já é a minha favorita.</p>
+    <div class="timeline" id="timeline"></div>
+  </section>
+
+  <!-- GALERIA -->
+  <section class="reveal">
+    <div class="kicker">pra guardar</div>
+    <h2>Nossas polaroids</h2>
+    <p class="sub">Uma por enquanto. O resto do mural a gente preenche junto.</p>
+    <div class="gallery" id="gallery"></div>
+  </section>
+
+  <!-- MÚSICA -->
+  <section class="reveal" id="musicSection" hidden>
+    <div class="kicker">aperta o play</div>
+    <h2>A nossa música</h2>
+    <div class="music">
+      <div class="vinyl"></div>
+      <div class="song" id="songName"></div>
+      <div class="artist" id="songArtist"></div>
+      <div id="player"></div>
+      <div class="why" id="songWhy"></div>
+    </div>
+  </section>
+
+  <!-- GIRASSOL QUE CRESCE -->
+  <section class="reveal">
+    <div class="kicker">plantado em 25/07</div>
+    <h2>O nosso girassol</h2>
+    <p class="sub">Ele cresce junto com a gente: a cada 10 dias, nasce uma pétala nova.</p>
+    <div class="grow">
+      <svg viewBox="0 0 300 400" id="growSvg" aria-label="Um girassol que cresce com o tempo"></svg>
+      <div class="growtxt"><b id="growCount"></b><p id="growTxt"></p></div>
+    </div>
+  </section>
+
+  <!-- MOTIVOS -->
+  <section class="reveal">
+    <div class="kicker">toque no girassol</div>
+    <h2>Por que eu gosto de você</h2>
+    <button class="flower-btn" id="flower" aria-label="Mostrar um motivo">🌻</button>
+    <p class="reason" id="reason">clica aí 👆</p>
+    <p class="count" id="rcount"></p>
+  </section>
+
+  <!-- CARTA -->
+  <section class="reveal">
+    <div class="kicker">uma cartinha</div>
+    <h2>Abra quando sentir saudade</h2>
+    <div class="envelope" id="env">
+      <div class="env-closed">
+        <div class="seal">💌</div>
+        <p>toque para abrir</p>
+      </div>
+      <div class="letter">
+        <p>Sarah,</p>
+        <p>Se tu me cativas, nós teremos necessidade um do outro. Serás para mim única no mundo. E eu serei para ti único no mundo. Só se vê bem com o coração, o essencial é invisível aos olhos.</p>
+        <p>Meu girassol não é como os outros, pois é o tempo que eu dediquei para ele que o tornou especial.</p>
+        <p class="sign">lov u 💛<br>Felipe</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIS CARTINHAS -->
+  <section class="reveal">
+    <div class="kicker">pra cada momento</div>
+    <h2>Abra quando…</h2>
+    <p class="sub">Uma cartinha pra cada tipo de dia. Abre só quando for a hora, tá? (eu sei que você vai abrir todas agora)</p>
+    <div class="envgrid" id="envgrid"></div>
+  </section>
+
+  <!-- VALES -->
+  <section class="reveal">
+    <div class="kicker">válidos pra sempre</div>
+    <h2>Vales pra trocar comigo</h2>
+    <p class="sub">Toca uma vez pra escolher e outra pra usar. Depois de usado, fica carimbado.</p>
+    <div class="vales" id="vales"></div>
+    <p class="vale-note" id="valeNote"></p>
+  </section>
+
+  <!-- LISTA -->
+  <section class="reveal">
+    <div class="kicker">um dia, todas</div>
+    <h2>Coisas pra fazer juntos</h2>
+    <p class="sub">Vai marcando conforme a gente for fazendo.</p>
+    <div class="bucket">
+      <div class="prog"><div class="bar"><i id="bProg" style="width:0"></i></div><span id="bCount"></span></div>
+      <div id="bucket"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p class="hand">feito com carinho pelo Felipe, para a Sarah · lov u 💛</p>
+  <p>Ribeirão Preto 💛 Francisco Morato</p>
+</footer>
+
+<!-- janela das cartinhas / mesversário -->
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* =====================================================================
+   ✏️  FELIPE: TUDO QUE VOCÊ PODE EDITAR FICA AQUI EM CIMA
+   ===================================================================== */
+const CONFIG = {
+  inicio: "2026-07-25T00:00:00-03:00",
+
+  // Próximos encontros (o site mostra sempre o próximo). Adiciona mais na lista quando marcar.
+  encontros: [
+    { quando: "2026-10-31T00:00:00-03:00", texto: "sábado, 31 de outubro" }
+  ],
+
+  // Seu número com DDI+DDD, só números (ex: "5516999999999").
+  // Se preencher, quando ela usar um vale aparece um botão pra te avisar no WhatsApp.
+  whatsapp: "",
+
+  // A nossa música. Cole o link do Spotify OU do YouTube (o site entende os dois).
+  // Enquanto ficar vazio, essa seção fica escondida.
+  musica: {
+    link: "",            // ex: "https://open.spotify.com/track/XXXX" ou "https://youtu.be/XXXX"
+    nome: "",
+    artista: "",
+    porque: ""           // ex: "toda vez que toca eu lembro de você"
+  },
+
+  // Linha do tempo. "futuro: true" deixa o item tracejado (ainda vai acontecer).
+  historia: [
+    { ico: "💬", quando: "lá no começo", titulo: "A primeira conversa", texto: "Eu não sabia ainda, mas foi ali que começou tudo." },
+    { ico: "💛", quando: "25 de julho de 2026", titulo: "O dia em que a gente se viu", texto: "O contador lá em cima começa aqui. Desde então, cada segundo conta." },
+    { ico: "🌻", quando: "15 de agosto de 2026", titulo: "Você e o buquê", texto: "Aquele sorriso virou a foto principal deste site. E do meu coração também." },
+    { ico: "✨", quando: "hoje", titulo: "Um cantinho só seu", texto: "Esse site aqui, feito pedacinho por pedacinho pensando em você." },
+    { ico: "🫶", quando: "31 de outubro de 2026", titulo: "A gente se vê de novo", texto: "Sábado. Já tô contando as horas.", futuro: true }
+  ],
+
+  // Polaroids. Pra adicionar foto: sobe o arquivo no GitHub (mesma pasta) e coloca o nome em "foto".
+  // Sem "foto", aparece um espaço reservado.
+  fotos: [
+    { foto: "39c34314-677b-4dd1-90b6-3b194a57fb7d.jpg", legenda: "girassol segurando girassóis" },
+    { legenda: "reservado pra nossa foto de sábado 📸" },
+    { legenda: "e pra todas as próximas" }
+  ],
+
+  frasesDoDia: [
+    "Bom dia pra você, que é a melhor parte de qualquer dia meu.",
+    "Hoje eu pensei em você umas 47 vezes. Mentira, perdi a conta.",
+    "Se saudade fosse quilômetro, eu já tinha chegado aí faz tempo.",
+    "Seu sorriso é o meu lugar favorito no mundo.",
+    "Você é a notificação que eu mais gosto de receber.",
+    "Nenhuma distância é grande quando o destino é você.",
+    "Girassol vira pro sol. Eu viro pra você.",
+    "Bebe água, come direito e lembra que alguém aqui te adora.",
+    "Hoje é um ótimo dia pra você lembrar o quanto é incrível.",
+    "Se der saudade, olha pra lua. Eu provavelmente tô olhando também.",
+    "Você deixa tudo mais leve. Até segunda-feira.",
+    "Tem dia que eu só queria um abraço seu. Hoje é um desses.",
+    "Eu escolheria você em qualquer universo paralelo.",
+    "Obrigado por existir desse jeitinho.",
+    "Conversar com você é sempre a melhor parte do meu dia.",
+    "Seus cachos, sua risada, seu jeito. Tudo meu favorito.",
+    "261 km não são nada perto do que eu sinto.",
+    "Você não precisa ser perfeita. Você já é a minha favorita.",
+    "Se hoje tiver difícil, lembra: tem cartinha lá embaixo pra isso.",
+    "Eu sorrio igual bobo quando seu nome aparece na tela.",
+    "Você é o meu lugar calmo.",
+    "Contar os dias pra te ver virou meu esporte favorito.",
+    "Hoje o céu tá bonito. Mas não tanto quanto você.",
+    "Que sorte a minha te encontrar nesse mundão.",
+    "Você é o meu \"vai dar tudo certo\".",
+    "Fica aqui um beijo guardado pra quando a gente se ver.",
+    "Nem o pôr do sol mais bonito ganha do seu sorriso.",
+    "Você é o meu sol de cada dia.",
+    "Saudade é só carinho que ainda não chegou no destino.",
+    "Amanhã tem outra frase. E eu continuo gostando de você."
+  ],
+
+  cartinhas: [
+    { ico: "🌧️", titulo: "estiver triste", texto: [
+      "Ei, vem cá.",
+      "Sei que hoje tá pesado. Não precisa fingir que tá tudo bem, nem pra mim, nem pra ninguém. Você pode ficar triste. Isso não te faz menos incrível.",
+      "Só quero que você lembre de uma coisa: você não tá sozinha. Me chama, mesmo que seja só pra ficar em silêncio na ligação. Eu fico.",
+      "E se eu estivesse aí agora, ia te dar aquele abraço demorado. (Tem vale pra isso lá embaixo, viu? Pode usar.)"
+    ]},
+    { ico: "🌙", titulo: "não conseguir dormir", texto: [
+      "Insônia de novo, né?",
+      "Então faz assim: deita confortável, respira fundo três vezes e imagina que eu tô do teu lado fazendo cafuné. Devagarinho.",
+      "Olha pela janela se der. Essa mesma lua tá aqui em cima de Ribeirão também. A gente tá debaixo do mesmo céu, mesmo agora.",
+      "Fecha os olhos. Amanhã tem frase nova aqui te esperando. Boa noite, meu girassol."
+    ]},
+    { ico: "⛈️", titulo: "tiver um dia ruim", texto: [
+      "Dia ruim não é vida ruim. Hoje foi chato, mas passa.",
+      "Lista de coisas que continuam verdade mesmo hoje: você é linda. Você é forte. Eu gosto muito de você. Girassóis existem. E o próximo encontro tá chegando.",
+      "Agora vai tomar um banho quentinho, come alguma coisa gostosa e me manda mensagem contando tudo. Eu quero saber, até a parte chata."
+    ]},
+    { ico: "😂", titulo: "quiser rir", texto: [
+      "Pronto, preparei as melhores piadas do Brasil (confia):",
+      "Por que a plantinha não foi atendida no hospital? Porque lá só tinha médico de plantão. 🌱",
+      "Qual é o café mais perigoso do mundo? O ex-presso. ☕",
+      "O que o tomate foi fazer no banco? Tirar extrato. 🍅",
+      "O que o pato disse pra pata? Vem quá. 🦆",
+      "Se nenhuma funcionou, imagina a minha cara rindo sozinho enquanto escrevia isso. Pronto, agora riu."
+    ]}
+  ],
+
+  vales: [
+    { ico: "🤗", titulo: "um abraço demorado", obs: "mínimo 2 minutos, sem soltar" },
+    { ico: "🍿", titulo: "um cinema", obs: "e eu pago a pipoca" },
+    { ico: "🏆", titulo: "ganhar uma discussão", obs: "mesmo se eu tiver razão" },
+    { ico: "📺", titulo: "escolher o filme", obs: "sem eu reclamar (vou tentar)" },
+    { ico: "📞", titulo: "ligação até dormir", obs: "pode dormir primeiro" },
+    { ico: "💆‍♀️", titulo: "cafuné ilimitado", obs: "até você cansar" },
+    { ico: "🍝", titulo: "um jantar", obs: "você escolhe o lugar" },
+    { ico: "🥺", titulo: "um dia de dengo", obs: "atenção total, 24h" }
+  ],
+
+  lista: [
+    "Ir no Jump em Jundiaí (aqueles lugares de pular) 🤸",
+    "Ver o pôr do sol juntos 🌇",
+    "Fazer a noite do hambúrguer 🍔",
+    "Ir na Tomorrowland 🎶",
+    "Ir no boliche 🎳",
+    "Ir no museu da polícia 🚓",
+    "Ir no parque 🌳"
+  ],
+
+  // Mensagem especial do mesversário (dia 25). Pode escrever uma pra cada mês: { 4: "texto", 5: "texto" }
+  mesversarios: {}
+};
+/* ===================================================================== */
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+// ?data=2026-10-31T10:00 simula outra data (só pra testar)
+const params = new URLSearchParams(location.search);
+const OFFSET = params.get("data") ? new Date(params.get("data")).getTime() - Date.now() : 0;
+const NOW = () => new Date(Date.now() + OFFSET);
+const start = new Date(CONFIG.inicio);
+const fmtDate = d => d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
+const plural = (n,s,p) => `${n} ${n===1?s:p}`;
+function split(ms){
+  ms = Math.max(0, ms);
+  const d = Math.floor(ms/864e5); ms -= d*864e5;
+  const h = Math.floor(ms/36e5);  ms -= h*36e5;
+  const m = Math.floor(ms/6e4);   ms -= m*6e4;
+  return {d,h,m,s:Math.floor(ms/1e3)};
+}
+const pad = n => String(n).padStart(2,"0");
+function monthsTogether(now){
+  let months = (now.getFullYear()-start.getFullYear())*12 + (now.getMonth()-start.getMonth());
+  if (now.getDate() < start.getDate()) months--;
+  return months;
+}
+const daysTogether = () => Math.floor((NOW() - start)/864e5);
+
+/* ---------- CONTADOR ---------- */
+function tick(){
+  const t = split(NOW() - start);
+  $("d").textContent = t.d.toLocaleString("pt-BR");
+  $("h").textContent = pad(t.h); $("m").textContent = pad(t.m); $("s").textContent = pad(t.s);
+  const now = NOW(), months = monthsTogether(now);
+  let next = new Date(now.getFullYear(), now.getMonth(), 25);
+  if (now.getDate() >= 25) next = new Date(now.getFullYear(), now.getMonth()+1, 25);
+  const faltam = Math.ceil((next - new Date(now.getFullYear(),now.getMonth(),now.getDate()))/864e5);
+  const nextTxt = now.getDate()===25 && months>0
+    ? ` · <strong>hoje é mesversário!</strong> 🎉`
+    : ` · próximo mesversário em ${plural(faltam,"dia","dias")}`;
+  $("since").innerHTML = (months > 0
+    ? `Já são <strong>${plural(months,"mês","meses")}</strong> desde 25/07/2026 💛`
+    : `Desde <strong>25/07/2026</strong> 💛`) + nextTxt;
+  meetTick();
+}
+
+/* ---------- PRÓXIMO ENCONTRO ---------- */
+function meetTick(){
+  const now = NOW();
+  const list = CONFIG.encontros.map(e=>({...e, at:new Date(e.quando)})).sort((a,b)=>a.at-b.at);
+  // encontro "vale" até o fim do dia dele
+  const next = list.find(e => now < new Date(e.at.getTime()+864e5));
+  const prevs = list.filter(e => e.at < now && (!next || e !== next));
+  const prev = prevs.length ? prevs[prevs.length-1].at : start;
+  const badge = $("heroBadge");
+  if (!next){
+    $("meetTitle").textContent = "Até a próxima vez";
+    $("meetSub").textContent = "E eu já tô contando os dias pra marcar a próxima 💛";
+    $("meetTimer").hidden = true; $("meetBarWrap").hidden = true; $("meetBig").hidden = true;
+    badge.innerHTML = ""; return;
+  }
+  $("meetKicker").textContent = next.texto || "o próximo encontro";
+  if (now >= next.at){
+    $("meetTitle").textContent = "Chegou o dia!";
+    $("meetSub").textContent = "Nada de contagem hoje. Hoje é abraço.";
+    $("meetTimer").hidden = true; $("meetBarWrap").hidden = true;
+    $("meetBig").hidden = false; $("meetBig").textContent = "é hoje que eu te vejo 🌻";
+    badge.innerHTML = "<b>é hoje!!</b> 🌻💛";
+    return;
+  }
+  const t = split(next.at - now);
+  $("md").textContent = t.d; $("mh").textContent = pad(t.h); $("mm").textContent = pad(t.m); $("ms").textContent = pad(t.s);
+  const diasCal = Math.round((new Date(next.at.getFullYear(),next.at.getMonth(),next.at.getDate()) - new Date(now.getFullYear(),now.getMonth(),now.getDate()))/864e5);
+  const fala = diasCal<=1 ? "É amanhã!! 🥹" : `Faltam ${diasCal} dias pra te ver`;
+  $("meetTitle").textContent = fala;
+  $("meetSub").textContent = diasCal<=1 ? "Amanhã eu te vejo. Dorme cedo, tá?" : "E cada um deles demora uma eternidade.";
+  badge.innerHTML = diasCal<=1 ? "<b>amanhã</b> eu te vejo 🌻" : `faltam <b>${diasCal} dias</b> pra te ver 🌻`;
+  const pct = Math.min(100, Math.max(2, (now - prev)/(next.at - prev)*100));
+  $("meetBar").style.width = pct.toFixed(1)+"%";
+  $("meetFrom").textContent = prev === start ? "25/07" : "último encontro";
+}
+tick(); setInterval(tick, 1000);
+
+/* ---------- FRASE DO DIA ---------- */
+(function(){
+  const fr = CONFIG.frasesDoDia, now = NOW();
+  const idx = ((daysTogether() % fr.length) + fr.length) % fr.length;
+  $("dailyText").textContent = "“" + fr[idx] + "”";
+  const dia = now.toLocaleDateString("pt-BR",{weekday:"long", day:"2-digit", month:"2-digit"});
+  $("dailyKicker").textContent = "frase de hoje · " + dia;
+})();
+
+/* ---------- MAPA ---------- */
+// pontos aproximados (bairro), sem endereço exato
+const eu   = [-21.164, -47.840];  // Felipe — Ribeirão Preto
+const ela  = [-23.278, -46.730];  // Sarah — Francisco Morato
+function haversine(a,b){
+  const R=6371, r=x=>x*Math.PI/180;
+  const dLat=r(b[0]-a[0]), dLon=r(b[1]-a[1]);
+  const h=Math.sin(dLat/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+const km = haversine(eu, ela);
+$("km").textContent = Math.round(km) + " km";
+$("steps").textContent = Math.round(km*1000/0.75).toLocaleString("pt-BR");
+
+let map = null;
+if (window.L) {
+map = L.map("map", {scrollWheelZoom:false, zoomControl:true});
+// mapa da CARTO (o servidor do OpenStreetMap bloqueia sites pessoais)
+L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  subdomains: "abcd", maxZoom: 19
+}).addTo(map);
+const icon = e => L.divIcon({className:"", html:`<div class="heart-icon">${e}</div>`, iconSize:[30,30], iconAnchor:[15,15]});
+L.marker(eu,{icon:icon("💛")}).addTo(map).bindPopup("<b>Felipe</b><br>Ribeirão Preto");
+L.marker(ela,{icon:icon("🌻")}).addTo(map).bindPopup("<b>Sarah</b><br>Francisco Morato").openPopup();
+const arc = [];
+const mid = [(eu[0]+ela[0])/2 + 0.25, (eu[1]+ela[1])/2 - 0.45];
+for (let t=0;t<=1;t+=0.02){
+  arc.push([(1-t)**2*eu[0]+2*(1-t)*t*mid[0]+t*t*ela[0], (1-t)**2*eu[1]+2*(1-t)*t*mid[1]+t*t*ela[1]]);
+}
+L.polyline(arc,{color:"#ff6f91",weight:4,opacity:.9,className:"route-line"}).addTo(map);
+map.fitBounds(L.latLngBounds([eu,ela]).pad(0.35));
+}
+
+/* ---------- O MESMO CÉU: LUA ---------- */
+const SYNODIC = 29.530588853;
+function moonPhase(date){ // 0 = nova, .5 = cheia
+  const ref = Date.UTC(2000,0,6,18,14); // lua nova de referência
+  return (((date - ref)/864e5 / SYNODIC) % 1 + 1) % 1;
+}
+function moonName(p){
+  if (p < .03 || p > .97) return "Lua nova";
+  if (p < .22) return "Lua crescente";
+  if (p < .28) return "Quarto crescente";
+  if (p < .47) return "Crescente gibosa";
+  if (p < .53) return "Lua cheia";
+  if (p < .72) return "Minguante gibosa";
+  if (p < .78) return "Quarto minguante";
+  return "Lua minguante";
+}
+(function drawMoon(){
+  const now = NOW(), p = moonPhase(now);
+  const illum = (1 - Math.cos(2*Math.PI*p))/2;
+  const rx = Math.abs(Math.cos(2*Math.PI*p))*46;
+  const crescent = illum < .5;
+  // desenhada com a parte iluminada à direita; espelha conforme a fase (vista do hemisfério sul)
+  const lit = `M50 4 A46 46 0 0 1 50 96 A${rx.toFixed(2)} 46 0 0 ${crescent?0:1} 50 4 Z`;
+  const waxing = p < .5;
+  const flip = waxing ? "scale(-1,1) translate(-100,0)" : ""; // no Brasil, crescente acende pela esquerda
+  $("moonSvg").innerHTML = `
+    <defs><radialGradient id="mg" cx="40%" cy="38%"><stop offset="0" stop-color="#fffdf3"/><stop offset="1" stop-color="#f1e2b8"/></radialGradient></defs>
+    <circle cx="50" cy="50" r="46" fill="#2c2440" stroke="rgba(255,247,232,.15)"/>
+    <g transform="${flip}"><path d="${lit}" fill="url(#mg)"/></g>
+    <circle cx="38" cy="36" r="5" fill="rgba(0,0,0,.06)"/><circle cx="60" cy="62" r="7" fill="rgba(0,0,0,.05)"/><circle cx="62" cy="34" r="3" fill="rgba(0,0,0,.06)"/>`;
+  $("moonName").textContent = moonName(p);
+  // próxima lua cheia
+  let dCheia = ((0.5 - p + 1) % 1) * SYNODIC;
+  if (p > .465 && p < .535) dCheia = 0;
+  const cheia = new Date(now.getTime() + dCheia*864e5);
+  $("moonPct").textContent = `${Math.round(illum*100)}% iluminada`;
+  $("skyLine2").textContent = dCheia === 0
+    ? "Hoje é lua cheia. Às 21h, olha pra cima. Eu vou estar olhando também. 🌕"
+    : `Próxima lua cheia: ${fmtDate(cheia)}. Combinado: às 21h a gente olha pra ela ao mesmo tempo. 🌕`;
+})();
+
+/* ---------- O MESMO CÉU: CLIMA + PÔR DO SOL ---------- */
+function wxInfo(code, day){
+  if (code === 0) return [day?"☀️":"🌙","céu limpo"];
+  if (code === 1) return [day?"🌤️":"🌙","quase sem nuvens"];
+  if (code === 2) return ["⛅","algumas nuvens"];
+  if (code === 3) return ["☁️","nublado"];
+  if (code === 45 || code === 48) return ["🌫️","neblina"];
+  if (code >= 51 && code <= 57) return ["🌦️","garoando"];
+  if (code >= 61 && code <= 67) return ["🌧️","chovendo"];
+  if (code >= 71 && code <= 77) return ["❄️","nevando (?!)"];
+  if (code >= 80 && code <= 82) return ["🌧️","pancadas de chuva"];
+  if (code >= 95) return ["⛈️","tempestade"];
+  return ["🌈","tempo doido"];
+}
+const isRain = c => (c>=51 && c<=67) || (c>=80);
+function fillWx(el, w, sunset){
+  const [ico, desc] = wxInfo(w.weather_code, w.is_day);
+  el.querySelector(".wx").textContent = ico;
+  el.querySelector(".temp").textContent = Math.round(w.temperature_2m) + "°";
+  el.querySelector(".desc").textContent = desc;
+  el.querySelector(".sunset b").textContent = sunset.slice(11,16);
+  return desc;
+}
+(async function(){
+  try{
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=" + ela[0]+","+eu[0] + "&longitude=" + ela[1]+","+eu[1] +
+      "&current=temperature_2m,weather_code,is_day&daily=sunset&timezone=America%2FSao_Paulo&forecast_days=1";
+    const r = await fetch(url); if(!r.ok) throw 0;
+    const [a, b] = await r.json(); // a = ela, b = eu
+    const dA = fillWx($("wxEla"), a.current, a.daily.sunset[0]);
+    const dB = fillWx($("wxEu"),  b.current, b.daily.sunset[0]);
+    const tA = Math.round(a.current.temperature_2m), tB = Math.round(b.current.temperature_2m);
+    let extra;
+    if (isRain(a.current.weather_code) && isRain(b.current.weather_code)) extra = "Chovendo nos dois lugares. Até o céu tá com saudade.";
+    else if (a.current.weather_code<=1 && b.current.weather_code<=1 && !a.current.is_day) extra = "Céu limpo dos dois lados: hoje dá pra ver as mesmas estrelas ✨";
+    else if (Math.abs(tA-tB) <= 1) extra = "Mesma temperatura, olha só. A gente combina até nisso.";
+    else if (tA < tB) extra = "Aí tá mais friozinho… queria tá aí pra te esquentar.";
+    else extra = "Aqui tá mais fresquinho. Me empresta um pouco desse calor?";
+    $("skyLine").textContent = `Aí tá ${tA}°C e ${dA}, aqui ${tB}°C e ${dB}. ${extra}`;
+    const mins = s => +s.slice(11,13)*60 + +s.slice(14,16);
+    const diff = mins(b.daily.sunset[0]) - mins(a.daily.sunset[0]);
+    if (Math.abs(diff) >= 1){
+      const nowM = NOW().getHours()*60 + NOW().getMinutes();
+      const p = nowM > Math.max(mins(a.daily.sunset[0]),mins(b.daily.sunset[0])) ? "Hoje o sol se pôs" : "Hoje o sol se põe";
+      $("skyLine").textContent += ` ${p} ${plural(Math.abs(diff),"minuto","minutos")} ${diff>0?"antes aí":"antes aqui"}.`;
+    }
+  }catch(e){
+    ["wxEla","wxEu"].forEach(id=>{ const el=$(id); el.querySelector(".wx").textContent="🌌"; el.querySelector(".temp").textContent=""; el.querySelector(".desc").textContent="não consegui ver o tempo agora"; el.querySelector(".sunset").hidden=true; });
+    $("skyLine").textContent = "O tempo eu não consegui ver agora. Mas a lua é a mesma, isso eu garanto.";
+  }
+})();
+
+/* ---------- FRASES ---------- */
+const quotes = [
+  ["Se alguém ama uma flor da qual só existe um exemplar em milhões e milhões de estrelas, isso basta para fazê-lo feliz quando as contempla.","O Pequeno Príncipe"],
+  ["O essencial é invisível aos olhos.","O Pequeno Príncipe"],
+  ["Foi o tempo que dedicaste à tua rosa que fez tua rosa tão importante.","O Pequeno Príncipe"],
+  ["Se tu vens, por exemplo, às quatro da tarde, desde as três eu começarei a ser feliz.","O Pequeno Príncipe"],
+  ["Tu te tornas eternamente responsável por aquilo que cativas.","O Pequeno Príncipe"],
+  ["A distância só ensina o tamanho do que a gente sente.","Felipe"],
+  ["São mais de 260 km entre nós, e nenhum centímetro de dúvida.","Felipe"],
+  ["Quem sente saudade é porque tem alguém especial.","dito popular"],
+  ["Longe dos olhos, perto do coração.","dito popular"],
+  ["Nem toda distância é ausência, nem todo silêncio é esquecimento.","dito popular"],
+  ["Você é o meu girassol: mesmo de longe, é pra você que eu me viro.","Felipe"]
+];
+const stage = $("quotes"), dots = $("dots");
+quotes.forEach(([t,a],i)=>{
+  const q=document.createElement("div"); q.className="quote"+(i===0?" on":"");
+  q.innerHTML=`<p>“${t}”</p><small>— ${a}</small>`; stage.appendChild(q);
+  const b=document.createElement("button"); b.setAttribute("aria-label","Frase "+(i+1));
+  if(i===0) b.className="on"; b.onclick=()=>show(i,true); dots.appendChild(b);
+});
+let qi=0, qtimer;
+function show(i,user){
+  stage.children[qi].classList.remove("on"); dots.children[qi].classList.remove("on");
+  qi=i; stage.children[qi].classList.add("on"); dots.children[qi].classList.add("on");
+  if(user){clearInterval(qtimer); qtimer=setInterval(()=>show((qi+1)%quotes.length),7000);}
+}
+qtimer=setInterval(()=>show((qi+1)%quotes.length),7000);
+
+/* ---------- LINHA DO TEMPO ---------- */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+$("timeline").innerHTML = CONFIG.historia.map(h => {
+  const quando = h.quando === "hoje" ? "hoje, " + NOW().toLocaleDateString("pt-BR",{day:"numeric",month:"long"}) : h.quando;
+  return `<div class="tl${h.futuro?" future":""}" data-ico="${esc(h.ico||"💛")}">
+    <div class="when">${esc(quando)}</div><h3>${esc(h.titulo)}</h3><p>${esc(h.texto)}</p></div>`;
+}).join("");
+
+/* ---------- GALERIA ---------- */
+$("gallery").innerHTML = CONFIG.fotos.map(f => `
+  <div class="polaroid"><div class="tape"></div>
+    ${f.foto ? `<img src="${esc(f.foto)}" alt="${esc(f.legenda||"foto nossa")}" loading="lazy">`
+             : `<div class="ph-empty"><span>📸</span>espaço reservado</div>`}
+    <div class="cap">${esc(f.legenda||"")}</div></div>`).join("");
+
+/* ---------- MÚSICA ---------- */
+(function(){
+  const m = CONFIG.musica; if (!m.link) return;
+  let embed = "";
+  const sp = m.link.match(/open\.spotify\.com\/(?:intl-[a-z]+\/)?(track|album|playlist)\/([A-Za-z0-9]+)/);
+  const yt = m.link.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/);
+  if (sp) embed = `<iframe src="https://open.spotify.com/embed/${sp[1]}/${sp[2]}?theme=0" height="152" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+  else if (yt) embed = `<iframe src="https://www.youtube.com/embed/${yt[1]}" style="aspect-ratio:16/9;height:auto" allow="encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
+  if (!embed) return;
+  $("player").innerHTML = embed;
+  $("songName").textContent = m.nome; $("songArtist").textContent = m.artista; $("songWhy").textContent = m.porque;
+  $("musicSection").hidden = false;
+})();
+
+/* ---------- GIRASSOL QUE CRESCE ---------- */
+(function(){
+  const days = Math.max(0, daysTogether());
+  const MAX = 36, petals = Math.min(MAX, Math.floor(days/10) + 1);
+  const cx = 150, cy = 120, svg = $("growSvg");
+  // distribui as pétalas pelos espaços usando o ângulo de ouro (igual girassol de verdade)
+  function slots(n, count){
+    const used = new Set(), out = [];
+    for (let k=0;k<count;k++){
+      let s = Math.round(((k*137.508)%360)/(360/n)) % n;
+      while (used.has(s)) s = (s+1)%n;
+      used.add(s); out.push(s);
+    }
+    return out;
+  }
+  const inner = Math.min(18, petals), outer = Math.max(0, petals-18);
+  const stemTop = cy + 30, stemH = 380 - stemTop;
+  let html = `<g class="grow-sway">
+    <path d="M150 380 C 146 320, 156 260, 150 ${stemTop}" stroke="#5f9a4a" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <path d="M150 300 C 120 285, 98 292, 82 270 C 112 262, 136 272, 150 300 Z" fill="#7fb069"/>
+    <path d="M150 250 C 178 238, 200 244, 216 222 C 186 214, 162 224, 150 250 Z" fill="#6ea85a"/>`;
+  const petal = (ang, len, w, col, dl) =>
+    `<g transform="rotate(${ang} ${cx} ${cy})"><path class="gp" style="--dl:${dl}s" d="M${cx} ${cy-26} C ${cx-w} ${cy-26-len*.35}, ${cx-w*.6} ${cy-26-len*.85}, ${cx} ${cy-26-len} C ${cx+w*.6} ${cy-26-len*.85}, ${cx+w} ${cy-26-len*.35}, ${cx} ${cy-26} Z" fill="${col}" stroke="rgba(160,90,0,.35)" stroke-width="1"/></g>`;
+  slots(18, outer).forEach((s,i)=>{ html += petal(s*20+10, 62, 15, "#ff9f1c", .3 + (inner + i)*.06); });
+  slots(18, inner).forEach((s,i)=>{ html += petal(s*20, 52, 14, "#ffc52e", .3 + i*.06); });
+  html += `<circle cx="${cx}" cy="${cy}" r="30" fill="#5a3412"/><circle cx="${cx}" cy="${cy}" r="30" fill="none" stroke="#3b220b" stroke-width="3"/>`;
+  for (let i=0;i<70;i++){ const a=i*2.39996, r=Math.sqrt(i)*3.3; html += `<circle cx="${(cx+r*Math.cos(a)).toFixed(1)}" cy="${(cy+r*Math.sin(a)).toFixed(1)}" r="1.5" fill="#c98a2b" opacity=".8"/>`; }
+  html += `</g>`;
+  svg.innerHTML = html;
+  const months = monthsTogether(NOW());
+  $("growCount").textContent = `${plural(petals,"pétala","pétalas")} 🌻`;
+  $("growTxt").textContent = petals >= MAX
+    ? "Girassol completo! Um ano inteiro de pétalas. Agora a gente planta o próximo."
+    : `${days} dias e ${plural(Math.max(0,months),"mês","meses")} de nós. Faltam ${MAX - petals} pétalas pra ele ficar completo, lá no nosso primeiro ano.`;
+})();
+
+/* ---------- MOTIVOS ---------- */
+const reasons = [
+  "Pelo seu sorriso, que ilumina mais que poste de rua à noite 😄",
+  "Pelo jeito que seus cachos têm vida própria",
+  "Porque você fica linda até de óculos tortos",
+  "Porque conversar com você é a melhor parte do meu dia",
+  "Porque com você até a saudade é bonita",
+  "Pela sua risada, que é o som mais gostoso de ouvir",
+  "Porque você me faz querer ser alguém melhor",
+  "Porque você é girassol: vira tudo pra luz",
+  "Porque 260 km parecem nada quando é por você",
+  "Porque desde 25/07 meu mundo ficou mais amarelo 🌻"
+];
+let ri = -1;
+$("flower").onclick = () => {
+  ri = (ri+1) % reasons.length;
+  const r = $("reason"); r.style.opacity = 0;
+  setTimeout(()=>{ r.textContent = reasons[ri]; r.style.opacity = 1; }, 250);
+  $("rcount").textContent = `motivo ${ri+1} de muitos`;
+  burst(8);
+};
+
+/* ---------- CARTA ---------- */
+$("env").onclick = () => { $("env").classList.add("open"); burst(20); };
+
+/* ---------- MODAL ---------- */
+const modal = $("modal");
+function openModal(html){ $("modalBox").innerHTML = html; modal.classList.add("on"); document.body.style.overflow="hidden";
+  const b = $("modalBox").querySelector(".closebtn"); b && b.focus(); }
+function closeModal(){ modal.classList.remove("on"); document.body.style.overflow=""; }
+modal.addEventListener("click", e => { if (e.target === modal || e.target.closest(".closebtn")) closeModal(); });
+addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+/* ---------- MAIS CARTINHAS ---------- */
+(function(){
+  const lidas = store.get("sarah-cartas", []);
+  const grid = $("envgrid");
+  CONFIG.cartinhas.forEach((c,i) => {
+    const b = document.createElement("button");
+    b.className = "minienv" + (lidas.includes(i) ? " read" : "");
+    b.innerHTML = `<span>${c.ico}</span><small>abra quando</small><b>${esc(c.titulo)}</b>`;
+    b.onclick = () => {
+      openModal(`<div class="letter"><h4>abra quando ${esc(c.titulo)}</h4><p>Sarah,</p>${c.texto.map(p=>`<p>${esc(p)}</p>`).join("")}<p class="sign">lov u 💛<br>Felipe</p></div><button class="closebtn">fechar 💛</button>`);
+      burst(14);
+      if (!lidas.includes(i)){ lidas.push(i); store.set("sarah-cartas", lidas); b.classList.add("read"); }
+    };
+    grid.appendChild(b);
+  });
+})();
+
+/* ---------- VALES ---------- */
+(function(){
+  const used = store.get("sarah-vales", {});
+  const box = $("vales");
+  const zap = CONFIG.whatsapp.replace(/\D/g,"");
+  $("valeNote").innerHTML = zap ? "depois de usar, me avisa pelo botão que aparece 😌" : "usou? tira um print e me manda 😌";
+  function render(){
+    box.innerHTML = "";
+    CONFIG.vales.forEach((v,i) => {
+      const b = document.createElement("button");
+      const u = used[i];
+      b.className = "vale" + (u ? " used" : "");
+      b.innerHTML = `<div class="ve">${v.ico}</div><div class="vk">vale</div><div class="vt">${esc(v.titulo)}</div><div class="vh">${esc(v.obs)}</div>` +
+        (u ? `<div class="stamp">USADO ${esc(u)}</div>` : "");
+      b.onclick = () => {
+        if (used[i]) return;
+        if (!b.classList.contains("armed")){
+          box.querySelectorAll(".armed").forEach(x=>{ x.classList.remove("armed"); x.querySelector(".vh").textContent = CONFIG.vales[+x.dataset.i].obs; });
+          b.classList.add("armed"); b.querySelector(".vh").textContent = "toca de novo pra usar ✨";
+          return;
+        }
+        used[i] = fmtDate(NOW()); store.set("sarah-vales", used); burst(18); render();
+        if (zap){
+          $("valeNote").innerHTML = `<a href="https://wa.me/${zap}?text=${encodeURIComponent("Vou usar meu vale: " + v.titulo + " 🌻")}" target="_blank" rel="noopener">💬 avisar o Felipe que você usou “${esc(v.titulo)}”</a>`;
+        }
+      };
+      b.dataset.i = i;
+      box.appendChild(b);
+    });
+  }
+  render();
+})();
+
+/* ---------- LISTA ---------- */
+(function(){
+  const done = store.get("sarah-lista", []);
+  const box = $("bucket");
+  function update(){
+    const n = done.length, t = CONFIG.lista.length;
+    $("bProg").style.width = Math.max(2, n/t*100) + "%";
+    $("bCount").textContent = `${n} de ${t}`;
+  }
+  CONFIG.lista.forEach((txt,i) => {
+    const l = document.createElement("label");
+    const on = done.includes(i);
+    l.className = "bitem" + (on ? " done" : "");
+    l.innerHTML = `<input type="checkbox" ${on?"checked":""}><span class="box">${on?"✓":""}</span><span class="btxt">${esc(txt)}</span>`;
+    const inp = l.querySelector("input");
+    inp.onchange = () => {
+      const k = done.indexOf(i);
+      if (inp.checked && k < 0) { done.push(i); burst(10); }
+      if (!inp.checked && k >= 0) done.splice(k,1);
+      l.classList.toggle("done", inp.checked);
+      l.querySelector(".box").textContent = inp.checked ? "✓" : "";
+      store.set("sarah-lista", done); update();
+    };
+    box.appendChild(l);
+  });
+  update();
+})();
+
+/* ---------- PÉTALAS ---------- */
+const petalBox = $("petals");
+function petal(){
+  const p=document.createElement("div"); p.className="petal";
+  p.textContent = Math.random()<.7 ? "🌻" : "💛";
+  p.style.left = Math.random()*100+"vw";
+  p.style.fontSize = (14+Math.random()*16)+"px";
+  p.style.setProperty("--dx",(Math.random()*160-80)+"px");
+  p.style.setProperty("--rot",(Math.random()*720-360)+"deg");
+  p.style.animationDuration = (6+Math.random()*6)+"s";
+  petalBox.appendChild(p); setTimeout(()=>p.remove(),13000);
+}
+function burst(n){ for(let i=0;i<n;i++) setTimeout(petal, i*90); }
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (calm) window.burst = ()=>{}; else { setInterval(petal, 1400); burst(6); }
+
+/* ---------- MESVERSÁRIO (todo dia 25) ---------- */
+(function(){
+  const now = NOW(), months = monthsTogether(now);
+  const force = params.has("mesversario");
+  if (!(force || (now.getDate() === 25 && months >= 1))) return;
+  const n = Math.max(1, months);
+  $("heroKicker").textContent = `feliz ${plural(n,"mês","meses")} 🎉`;
+  const msg = CONFIG.mesversarios[n] ||
+    `Hoje faz ${plural(n,"mês","meses")} desde 25 de julho. ${plural(n,"mês","meses")} de você deixando meus dias mais amarelos. Obrigado por cada um deles. Que venham muitos, muitos mais.`;
+  setTimeout(() => {
+    openModal(`<div class="mesv"><div class="big">🌻</div><h3>Feliz <em>${plural(n,"mês","meses")}</em>!</h3><p>${esc(msg)}</p><p class="hand">lov u 💛 Felipe</p><button class="closebtn">ver o site 💛</button></div>`);
+    if (!calm) burst(40);
+  }, 900);
+})();
+
+/* ---------- ESTRELAS ---------- */
+const cv=$("stars"), cx=cv.getContext("2d"); let stars=[];
+function size(){ cv.width=innerWidth*devicePixelRatio; cv.height=innerHeight*devicePixelRatio;
+  stars=Array.from({length:Math.round(innerWidth/6)},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height*.8,r:Math.random()*1.4*devicePixelRatio+.3,p:Math.random()*6.28})); }
+function draw(t){ cx.clearRect(0,0,cv.width,cv.height);
+  for(const s of stars){ cx.globalAlpha=.35+.65*Math.abs(Math.sin(t/1400+s.p)); cx.fillStyle="#fff7e8"; cx.beginPath(); cx.arc(s.x,s.y,s.r,0,6.28); cx.fill(); }
+  requestAnimationFrame(draw); }
+size(); addEventListener("resize",size); requestAnimationFrame(draw);
+
+/* ---------- REVEAL ---------- */
+const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("on"); if(e.target.querySelector("#map")) map && map.invalidateSize(); } }),{threshold:.15});
+document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

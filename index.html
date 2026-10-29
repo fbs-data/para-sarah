@@ -223,7 +223,7 @@
   .vale:hover{transform:translateY(-3px)}
   .vale:before{content:"";position:absolute;left:12px;top:10px;bottom:10px;border-left:2px dashed rgba(160,118,47,.35)}
   .vale .vk{font-size:.7rem;text-transform:uppercase;letter-spacing:.16em;color:#a0762f}
-  .vale .vt{font-family:"Caveat",cursive;font-size:1.6rem;line-height:1.1;font-weight:700;margin:2px 0}
+  .vale .vt{font-family:"Caveat",cursive;font-size:1.6rem;line-height:1.1;font-weight:700;margin:2px 0;padding-right:30px}
   .vale .vh{font-size:.8rem;color:#8a6d47}
   .vale .ve{position:absolute;right:14px;top:12px;font-size:26px}
   .vale.armed{background:#ffe0a3;outline:3px solid var(--sun2)}
@@ -586,14 +586,24 @@ const CONFIG = {
   ],
 
   vales: [
+    { ico: "💆‍♀️", titulo: "uma massagem nas costas", obs: "com creminho e sem pressa" },
+    { ico: "🦶", titulo: "uma massagem nos pés", obs: "depois de um dia cansativo" },
     { ico: "🤗", titulo: "um abraço demorado", obs: "mínimo 2 minutos, sem soltar" },
+    { ico: "💋", titulo: "um beijo de cinema", obs: "daqueles de final de filme" },
+    { ico: "😴", titulo: "cafuné até dormir", obs: "até você apagar" },
+    { ico: "🥐", titulo: "café da manhã na cama", obs: "com tudo que você gosta" },
+    { ico: "🍔", titulo: "uma noite do hambúrguer", obs: "eu faço, você só come" },
     { ico: "🍿", titulo: "um cinema", obs: "e eu pago a pipoca" },
-    { ico: "🏆", titulo: "ganhar uma discussão", obs: "mesmo se eu tiver razão" },
     { ico: "📺", titulo: "escolher o filme", obs: "sem eu reclamar (vou tentar)" },
+    { ico: "🍫", titulo: "um chocolate surpresa", obs: "entregue quando você menos esperar" },
+    { ico: "🗺️", titulo: "um rolê surpresa", obs: "eu planejo tudo, você só vai" },
+    { ico: "🏆", titulo: "ganhar uma discussão", obs: "mesmo se eu tiver razão" },
+    { ico: "🙊", titulo: "um perdão instantâneo", obs: "vale pra uma bobeira qualquer" },
     { ico: "📞", titulo: "ligação até dormir", obs: "pode dormir primeiro" },
-    { ico: "💆‍♀️", titulo: "cafuné ilimitado", obs: "até você cansar" },
-    { ico: "🍝", titulo: "um jantar", obs: "você escolhe o lugar" },
-    { ico: "🥺", titulo: "um dia de dengo", obs: "atenção total, 24h" }
+    { ico: "🎶", titulo: "uma playlist só sua", obs: "montada música por música" },
+    { ico: "📵", titulo: "um dia sem celular", obs: "atenção total em você" },
+    { ico: "✅", titulo: "um \"sim\" pra qualquer pedido", obs: "dentro do razoável 😅" },
+    { ico: "🥺", titulo: "um dia de dengo", obs: "mimo total, 24h" }
   ],
 
   lista: [
@@ -984,7 +994,7 @@ addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
 /* ---------- VALES ---------- */
 (function(){
-  const used = store.get("sarah-vales", {});
+  const used = store.get("sarah-vales-v2", {});
   const box = $("vales");
   const zap = CONFIG.whatsapp.replace(/\D/g,"");
   $("valeNote").innerHTML = zap ? "depois de usar, me avisa pelo botão que aparece 😌" : "usou? tira um print e me manda 😌";
@@ -1003,7 +1013,7 @@ addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
           b.classList.add("armed"); b.querySelector(".vh").textContent = "toca de novo pra usar ✨";
           return;
         }
-        used[i] = fmtDate(NOW()); store.set("sarah-vales", used); burst(18); render();
+        used[i] = fmtDate(NOW()); store.set("sarah-vales-v2", used); burst(18); render();
         if (zap){
           $("valeNote").innerHTML = `<a href="https://wa.me/${zap}?text=${encodeURIComponent("Vou usar meu vale: " + v.titulo + " 🌻")}" target="_blank" rel="noopener">💬 avisar o Felipe que você usou “${esc(v.titulo)}”</a>`;
         }
